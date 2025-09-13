@@ -1,21 +1,11 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
-
-  const { title, description, icon }: { title: string, description: string, icon: Snippet } = $props();
+	import classNames from "classnames";
+	
+	const { title, icon, class: className, onClick }: { title: string; icon: Snippet; class?: string; onClick: () => void } = $props();
 </script>
 
-<div
-	class="bg-white rounded-2xl p-6 border border-gray-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
->
-	<h3 class="text-xl font-semibold text-primary flex items-center gap-3 mb-4">
-		<span
-			class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center"
-		>
-			{@render icon?.()}
-		</span>
-		{title}
-	</h3>
-	<p class="text-gray-600">
-		{description}
-	</p>
-</div>
+<button class={classNames("feature-tab rounded-lg p-4 text-center border border-gray-200", className)} onclick={onClick}>
+	{@render icon?.()}
+	<h3 class="font-semibold">{title}</h3>
+</button>
