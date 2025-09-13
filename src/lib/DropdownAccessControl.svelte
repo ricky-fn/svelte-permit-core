@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-	import { createDropdownAccessAction, type RolePermissionGroup, type AccessControl, type Role, Permission } from 'permit-core';
+	import { createDropdownAccessAction, type RolePermissionGroup, type AccessControl, type Role, Permission, type Group } from 'permit-core';
 	import type { Writable } from 'svelte/store';
 	import { getContext, type Snippet } from 'svelte';
 
@@ -13,6 +13,7 @@
 
 	const accessControl = getContext<Writable<AccessControl>>('AccessControl');
 	const currentRole = getContext<Writable<Role>>('CurrentAccessRole');
+	const currentRoleGroup = getContext<Writable<Group | undefined>>('CurrentAccessRoleGroup');
 	const permissions = getContext<Writable<RolePermissionGroup<string>>>('AccessPermissions');
 
 	let accessibleItems = $state<Array<T>>([]);
@@ -24,11 +25,11 @@
 		if (
 			$currentRole && 
 			($currentRole.getCode() !== currentRoleCode 
-			|| $currentRole.getGroup()?.getCode() !== currentRoleGroupCode
+			|| $currentRoleGroup?.getCode() !== currentRoleGroupCode
 			|| $currentRole.getPermissions().length !== currentRolePermissions.length)
 		) {
 			currentRoleCode = $currentRole.getCode();
-			currentRoleGroupCode = $currentRole.getGroup()?.getCode();
+			currentRoleGroupCode = $currentRoleGroup?.getCode();
 			currentRolePermissions = $currentRole.getPermissions();
 
 			const dropdownAccessAction = createDropdownAccessAction(currentRoleCode, {

@@ -6,15 +6,21 @@
 </script>
 
 <script lang="ts">
-    import { ComponentAccessAction, type AccessControl, type RolePermissionGroup, type Role} from "permit-core";
+    import { ComponentAccessAction, type AccessControl, type RolePermissionGroup, type Role, type Group} from "permit-core";
 	import { getContext, type Snippet } from 'svelte';
 	import type { Writable } from 'svelte/store';
 
-	const { identifier, rules, children }: { identifier: string; rules: ComponentAccessRules, children: Snippet<[{ isEditable: boolean; role: Role }]> } = $props();
+	const { identifier, rules = [], children, fallback }: { 
+		identifier: string; 
+		rules?: ComponentAccessRules, 
+		children: Snippet<[{ isEditable: boolean; role: Role }]>, 
+		fallback?: Snippet<[{ role: Role }]> 
+	} = $props();
 
-	const accessControl = getContext<Writable<AccessControl>>('AccessControl');
+	const accessControl = getContext<AccessControl>('AccessControl');
 	const permissions = getContext<Writable<RolePermissionGroup<string>>>('AccessPermissions');
 	const currentRole = getContext<Writable<Role>>("CurrentAccessRole");
+	const currentRoleGroup = getContext<Writable<Group>>("CurrentAccessRoleGroup");
 
 	let isVisible = $state(false);
 	let isEditable = $state(false);
@@ -26,27 +32,23 @@
 		if (
 			$currentRole && 
 			($currentRole.getCode() !== currentRoleCode
-			|| $currentRole.getGroup()?.getCode() !== currentRoleGroupCode
+			|| $currentRoleGroup?.getCode() !== currentRoleGroupCode
 			|| $currentRole.getPermissions().length !== currentRolePermissions.length)
 		) {
 			currentRoleCode = $currentRole.getCode();
-			currentRoleGroupCode = $currentRole.getGroup()?.getCode();
+			currentRoleGroupCode = $currentRoleGroup?.getCode();
 			currentRolePermissions = $currentRole.getPermissions();
 			const componentViewAction = new ComponentAccessAction(currentRoleCode, {
 				identifier: identifier,
 				action: 'view'
 			});
 
-			$accessControl.checkPermissions<ComponentAccessAction>(componentViewAction, {
+			accessControl.checkPermissions<ComponentAccessAction>(componentViewAction, {
 				onSuccess: (action) => {
-					if (action.getParameters().identifier === identifier) {
-						isVisible = true;
-					}
+					isVisible = true;
 				},
 				onFailure: (action) => {
-					if (action.getParameters().identifier === identifier) {
-						isVisible = false;
-					}
+					isVisible = false;
 				}
 			});
 
@@ -55,16 +57,12 @@
 				action: 'edit'
 			});
 
-			$accessControl.checkPermissions<ComponentAccessAction>(componentEditAction, {
+			accessControl.checkPermissions<ComponentAccessAction>(componentEditAction, {
 				onSuccess: (action) => {
-					if (action.getParameters().identifier === identifier) {
-						isEditable = true;
-					}
+					isEditable = true;
 				},
 				onFailure: (action) => {
-					if (action.getParameters().identifier === identifier) {
-						isEditable = false;
-					}
+					isEditable = false;
 				}
 			});
 		}
@@ -84,4 +82,6 @@
 
 {#if isVisible}
     {@render children({isEditable, role: $currentRole})}
+{:else if fallback}
+    {@render fallback({role: $currentRole})}
 {/if}

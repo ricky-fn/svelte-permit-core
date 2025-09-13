@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createRouteAccessAction, type AccessControl, type Role, Permission } from "permit-core";
+    import { createRouteAccessAction, type AccessControl, type Role, Permission, type Group } from "permit-core";
     import type { Writable } from "svelte/store";
     import { getContext, type Snippet } from "svelte";
 
@@ -7,7 +7,7 @@
 
     const accessControl = getContext<Writable<AccessControl>>('AccessControl');
     const currentRole = getContext<Writable<Role>>('CurrentAccessRole');
-
+    const currentRoleGroup = getContext<Writable<Group | undefined>>('CurrentAccessRoleGroup');
     let isVisible = $state<boolean>(false);
     let currentRoleCode = $state<string>();
     let currentRolePermissions = $state<Permission[]>([]);
@@ -17,11 +17,11 @@
         if (
             $currentRole && 
             ($currentRole.getCode() !== currentRoleCode 
-            || $currentRole.getGroup()?.getCode() !== currentRoleGroupCode
+            || $currentRoleGroup?.getCode() !== currentRoleGroupCode
             || $currentRole.getPermissions().length !== currentRolePermissions.length)
         ) {
             currentRoleCode = $currentRole.getCode();
-            currentRoleGroupCode = $currentRole.getGroup()?.getCode();
+            currentRoleGroupCode = $currentRoleGroup?.getCode();
             currentRolePermissions = $currentRole.getPermissions();
 
             const routeAccessAction = createRouteAccessAction(currentRoleCode, {
