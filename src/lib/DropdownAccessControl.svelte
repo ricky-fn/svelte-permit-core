@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-	import { createDropdownAccessAction, type RolePermissionGroup, type AccessControl, type Role, Permission, type Group } from 'permit-core';
+	import { createDropdownAccessAction, type AccessControl, type Role, type Group, createDropdownPermission } from 'permit-core';
 	import type { Writable } from 'svelte/store';
 	import { getContext, type Snippet } from 'svelte';
 
@@ -11,20 +11,19 @@
 	
 	const { list, identifier, children }: { list: Array<T>, identifier: string, children: Snippet<[{ isEditable: boolean; role: Writable<Role>; item: T; index: number }]> } = $props();
 
-	const accessControl = getContext<Writable<AccessControl>>('AccessControl');
-	const currentRole = getContext<Writable<Role>>('CurrentAccessRole');
-	const currentRoleGroup = getContext<Writable<Group | undefined>>('CurrentAccessRoleGroup');
-	const permissions = getContext<Writable<RolePermissionGroup<string>>>('AccessPermissions');
+	const accessControl = getContext<AccessControl>('AccessControl');
+	const currentRole = getContext<Writable<Role>>("CurrentAccessRole");
+	const currentRoleGroup = getContext<Writable<Group>>("CurrentAccessRoleGroup");
 
-	let accessibleItems = $state<Array<T>>([]);
 	let currentRoleCode = $state<string>();
-	let currentRolePermissions = $state<Permission[]>([]);
 	let currentRoleGroupCode = $state<string | undefined>();
+	let currentRolePermissions = $state([]);
+	let accessibleItems = $state<Array<T>>([]);
 
 	$effect(() => {
 		if (
 			$currentRole && 
-			($currentRole.getCode() !== currentRoleCode 
+			($currentRole.getCode() !== currentRoleCode
 			|| $currentRoleGroup?.getCode() !== currentRoleGroupCode
 			|| $currentRole.getPermissions().length !== currentRolePermissions.length)
 		) {
@@ -37,9 +36,9 @@
 				dropdown: list as string[]
 			});
 
-			$accessControl.checkPermissions<ReturnType<typeof createDropdownAccessAction>>(dropdownAccessAction, {
+			accessControl.checkPermissions<ReturnType<typeof createDropdownAccessAction>>(dropdownAccessAction, {
 				onSuccess: (action) => {
-					const dropdownAccessPermission = $permissions[action.getRoleCode()][action.getType()];
+					const dropdownAccessPermission = $currentRole.getPermissions<ReturnType<typeof createDropdownPermission>>("dropdown")[0];
 					accessibleItems = dropdownAccessPermission.getAccessibleList(action) as Array<T>;
 				},
 				onFailure: () => {
@@ -51,5 +50,5 @@
 </script>
 
 {#each list as item, index}
-    {children({ isEditable: accessibleItems.includes(item), role: currentRole, item, index })}
+    {@render children({ isEditable: accessibleItems.includes(item), role: currentRole, item, index })}
 {/each}

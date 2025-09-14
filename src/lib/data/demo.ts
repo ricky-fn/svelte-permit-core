@@ -34,5 +34,18 @@ export const DEMO_DATA = {
         title: 'Route Access',
         id: 'route',
         icon: faRoute
+    }],
+    dropdownItems: [{
+        name: 'Edit User',
+        id: 'edit-user',
+    }, {
+        name: 'Delete User',
+        id: 'delete-user',
+    }, {
+        name: 'Reset Password',
+        id: 'reset-password',
+    }, {
+        name: 'Change Role',
+        id: 'change-role',
     }]
 }

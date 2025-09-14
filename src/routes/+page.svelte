@@ -5,12 +5,13 @@
 	import { user } from "$stores/user.store";
 	import AccessControlProvider from "$lib/AccessControlProvider.svelte";
 	import Footer from "$components/Footer.svelte";
-	import { createComponentPermission, createGroup, createRole, createRoutePermission } from "permit-core";
+	import { createComponentPermission, createDropdownPermission, createGroup, createRole, createRoutePermission } from "permit-core";
 	import { writable } from "svelte/store";
 	import { DEMO_DATA } from "$lib/data/demo";
 	import { onMount } from "svelte";
 	import LivePanel from "$components/LivePanel.svelte";
 	import ComponentDemo from "$components/ui/ComponentDemo.svelte";
+	import DropdownDemo from "$components/ui/DropdownDemo.svelte";
 
 	let currentTab = $state(writable(DEMO_DATA.tabs[0].id));
   
@@ -35,6 +36,10 @@
 				identifier: /.*/,
 				actions: ['view', 'edit']
 			}]),
+			dropdown: createDropdownPermission(adminGroup, [{
+				identifier: /.*/,
+				list: /.*/
+			}]),
 		},
 		[contentGroup.getCode()]: {
 			navigation: createRoutePermission(contentGroup, []),
@@ -45,6 +50,10 @@
 			}, {
 				identifier: "content-panel",
 				actions: ['view', 'edit']
+			}]),
+			dropdown: createDropdownPermission(contentGroup, [{
+				identifier: "dropdown-items",
+				list: ["edit-user", "reset-password"] as typeof DEMO_DATA.dropdownItems[number]['id'][]
 			}]),
 		},
 	}
@@ -58,6 +67,10 @@
 				identifier: /.*/,
 				actions: ['view', 'edit']
 			}]),
+			dropdown: createDropdownPermission(adminRole, [{
+				identifier: /.*/,
+				list: /.*/
+			}]),
 		},
 		[editorRole.getCode()]: {
 			navigation: createRoutePermission(editorRole, []),
@@ -67,6 +80,10 @@
 			}, {
 				identifier: 'content-panel',
 				actions: ['view', 'edit']
+			}]),
+			dropdown: createDropdownPermission(editorRole, [{
+				identifier: "dropdown-items",
+				list: ["edit-user", "reset-password"] as typeof DEMO_DATA.dropdownItems[number]['id'][]
 			}]),
 		},
 		[viewerRole.getCode()]: {
@@ -94,8 +111,11 @@
 	<ConfigurationPanel/>
 
 	<LivePanel>
-		<ComponentDemo />
-		<!-- <DropdownDemo /> -->
+		{#if $currentTab === DEMO_DATA.tabs[0].id}
+			<ComponentDemo />
+		{:else if $currentTab === DEMO_DATA.tabs[1].id}
+			<DropdownDemo />
+		{/if}
 		<!-- <MenuDemo /> -->
 		<!-- <RouteDemo /> -->
 	</LivePanel>
