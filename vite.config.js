@@ -21,6 +21,8 @@ export default defineConfig({
 			$actions: path.resolve("./src/actions"),
 			$components: path.resolve("./src/components"),
 			$data: path.resolve("./src/data"),
+			$lib: path.resolve("./src/lib"),
+			$stores: path.resolve("./src/stores"),
 			$routes: path.resolve("./src/routes"),
 			$runes: path.resolve("./src/runes"),
 			$styles: path.resolve("./src/styles"),
