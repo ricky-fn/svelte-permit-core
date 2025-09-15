@@ -58,6 +58,7 @@
 	"dependencies": {
 		"@fortawesome/free-brands-svg-icons": "^7.0.0",
 		"@fortawesome/free-solid-svg-icons": "^7.0.0",
+		"@tailwindcss/postcss": "^4.1.13",
 		"@tailwindcss/vite": "4.1.11",
 		"classnames": "^2.5.1",
 		"permit-core": "1.2.1",

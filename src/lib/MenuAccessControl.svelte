@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-	import { MenuAccessAction, type RolePermissionGroup, type AccessControl, type Role, Permission, type Group } from 'permit-core';
+	import { MenuAccessAction, type RolePermissionGroup, type AccessControl, type Role, type Group, MenuAccessPermission } from 'permit-core';
 	import type { Writable } from 'svelte/store';   
 	import { getContext, type Snippet } from 'svelte';
 
@@ -11,15 +11,14 @@
 
     const { menuList, identifier, children }: { menuList: Array<T>, identifier: string, children: Snippet<[{ isEditable: boolean; role: Writable<Role>; menu: T; index: number }]> } = $props();
 
-	const accessControl = getContext<Writable<AccessControl>>('AccessControl');
-	const currentRole = getContext<Writable<Role | undefined>>('CurrentAccessRole');
-	const currentRoleGroup = getContext<Writable<Group | undefined>>('CurrentAccessRoleGroup');
-	const permissions = getContext<Writable<RolePermissionGroup<string>>>('AccessPermissions');
+	const accessControl = getContext<AccessControl>('AccessControl');
+	const currentRole = getContext<Writable<Role>>("CurrentAccessRole");
+	const currentRoleGroup = getContext<Writable<Group>>("CurrentAccessRoleGroup");
 
 	let accessibleMenu = $state<Array<T>>([]);
 	let currentRoleCode = $state<string>();
-	let currentRolePermissions = $state<Permission[]>([]);
 	let currentRoleGroupCode = $state<string | undefined>();
+	let currentRolePermissions = $state([]);
 
 	$effect(() => {
 		if (
@@ -37,9 +36,9 @@
 				menu: menuList as string[]
 			});
 
-			$accessControl.checkPermissions<MenuAccessAction>(menuAccessAction, {
+			accessControl.checkPermissions<MenuAccessAction>(menuAccessAction, {
 				onSuccess: (action) => {
-					const menuAccessPermission = $permissions[action.getRoleCode()][action.getType()];
+					const menuAccessPermission = $currentRole.getPermissions<MenuAccessPermission>("menu")[0];
 					accessibleMenu = menuAccessPermission.getAccessibleList(action) as Array<T>;
 				},
 				onFailure: () => {
@@ -51,5 +50,5 @@
 </script>
 
 {#each menuList as menu, index}
-    {children({ isEditable: accessibleMenu.includes(menu), role: currentRole, menu, index })}
+    {@render children({ isEditable: accessibleMenu.includes(menu), role: currentRole, menu, index })}
 {/each}

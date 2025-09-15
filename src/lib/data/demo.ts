@@ -47,5 +47,21 @@ export const DEMO_DATA = {
     }, {
         name: 'Change Role',
         id: 'change-role',
+    }],
+    menuItems: [{
+        name: 'Dashboard',
+        id: 'dashboard',
+    }, {
+        name: 'Content',
+        id: 'content',
+    }, {
+        name: 'Analytics',
+        id: 'analytics',
+    }, {
+        name: 'Admin',
+        id: 'admin',
+    }, {
+        name: 'Settings',
+        id: 'settings',
     }]
 }
