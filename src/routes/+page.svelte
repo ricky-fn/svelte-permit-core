@@ -13,6 +13,7 @@
 	import ComponentDemo from "$components/ui/ComponentDemo.svelte";
 	import DropdownDemo from "$components/ui/DropdownDemo.svelte";
 	import MenuDemo from "$components/ui/MenuDemo.svelte";
+	import RouteDemo from "$components/ui/RouteDemo.svelte";
 
 	let currentTab = $state(writable(DEMO_DATA.tabs[0].id));
   
@@ -47,7 +48,10 @@
 			}]),
 		},
 		[contentGroup.getCode()]: {
-			navigation: createRoutePermission(contentGroup, []),
+			navigation: createRoutePermission(contentGroup, [{
+				route: "/admin" as typeof DEMO_DATA.routes[number]['path'],
+				exclude: true
+			}]),
 			component: createComponentPermission(contentGroup, [{
 				identifier: "admin-panel",
 				actions: ['edit'],
@@ -88,7 +92,9 @@
 			}]),
 		},
 		[editorRole.getCode()]: {
-			navigation: createRoutePermission(editorRole, []),
+			navigation: createRoutePermission(editorRole, [{
+				route: "/content" as typeof DEMO_DATA.routes[number]['path'],
+			}]),
 			component: createComponentPermission(editorRole, [{
 				identifier: 'admin-panel',
 				actions: ['view']
@@ -140,8 +146,9 @@
 			<DropdownDemo />
 		{:else if $currentTab === DEMO_DATA.tabs[2].id}
 			<MenuDemo />
+		{:else if $currentTab === DEMO_DATA.tabs[3].id}
+			<RouteDemo />
 		{/if}
-		<!-- <RouteDemo /> -->
 	</LivePanel>
 
 	<Footer/>

@@ -63,5 +63,12 @@ export const DEMO_DATA = {
     }, {
         name: 'Settings',
         id: 'settings',
+    }],
+    routes: [{
+        name: 'Admin Panel',
+        path: '/admin',
+    }, {
+        name: 'Content Panel',
+        path: '/content',
     }]
 }
