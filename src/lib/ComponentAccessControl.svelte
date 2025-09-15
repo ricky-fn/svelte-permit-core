@@ -18,7 +18,6 @@
 	} = $props();
 
 	const accessControl = getContext<AccessControl>('AccessControl');
-	const permissions = getContext<Writable<RolePermissionGroup<string>>>('AccessPermissions');
 	const currentRole = getContext<Writable<Role>>("CurrentAccessRole");
 	const currentRoleGroup = getContext<Writable<Group>>("CurrentAccessRoleGroup");
 
@@ -68,16 +67,16 @@
 		}
 	});
 
-	$effect(() => {
-		if (rules && rules.length > 0) {
-			rules.forEach((rule) => {
-				$permissions[rule.role].component.addRule({
-					actions: rule.actions,
-					identifier
-				});
-			});
-		}
-	});
+	// $effect(() => {
+	// 	if (rules && rules.length > 0) {
+	// 		rules.forEach((rule) => {
+	// 			$permissions[rule.role].component.addRule({
+	// 				actions: rule.actions,
+	// 				identifier
+	// 			});
+	// 		});
+	// 	}
+	// });
 </script>
 
 {#if isVisible}

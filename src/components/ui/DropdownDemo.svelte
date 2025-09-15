@@ -33,7 +33,7 @@
                     permission.getRules()
                         .filter(rule => permission.getTarget() === $currentRole && permission.rules.includes(rule))
                         .map(rule => 
-                            `${rule.list instanceof Array ? rule.list.join(', ') : rule.list}`
+                            `${rule.exclude ? '-' : '+'}${rule.list instanceof Array ? rule.list.join(`, ${rule.exclude ? '-' : '+'}`) : rule.list}`
                         )
                 )
                 .flat();
@@ -41,7 +41,7 @@
             if ($currentRoleGroup) {
                 groupPermissions = $currentRoleGroup.getPermissions<ReturnType<typeof createDropdownPermission>>("dropdown")
                     .filter(permission => permission.getTarget() === $currentRoleGroup)
-                    .map(permission => permission.getRules().map(rule => `${rule.list instanceof Array ? rule.list.join(', ') : rule.list}`))
+                    .map(permission => permission.getRules().map(rule => `${rule.exclude ? '-' : '+'}${rule.list instanceof Array ? rule.list.join(`, ${rule.exclude ? '-' : '+'}`) : rule.list}`))
                     .flat();
             } else {
                 groupPermissions = [];
@@ -64,6 +64,8 @@
 
         } else {
             rolePermissions = [];
+            groupPermissions = [];
+            effectivePermissions = [];
         }
 
         return {

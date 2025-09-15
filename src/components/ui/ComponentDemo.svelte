@@ -33,7 +33,7 @@
                     permission.getRules()
                         .filter(rule => permission.getTarget() === $currentRole && permission.rules.includes(rule))
                         .map(rule => 
-                            `${rule.identifier} (${rule.actions.join(', ')})`
+                            `${rule.exclude ? '-' : '+'}${rule.identifier} (${rule.actions.join(`, ${rule.exclude ? '-' : '+'}`)})`
                         )
                 )
                 .flat();
@@ -41,7 +41,7 @@
             if ($currentRoleGroup) {
                 groupPermissions = $currentRoleGroup.getPermissions<ComponentAccessPermission>("component")
                     .filter(permission => permission.getTarget() === $currentRoleGroup)
-                    .map(permission => permission.getRules().map(rule => `${rule.identifier} (${rule.actions.join(', ')})`))
+                    .map(permission => permission.getRules().map(rule => `${rule.exclude ? '-' : '+'}${rule.identifier} (${rule.actions.join(`, ${rule.exclude ? '-' : '+'}`)})`))
                     .flat();
             } else {
                 groupPermissions = [];
