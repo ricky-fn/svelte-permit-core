@@ -35,35 +35,49 @@ export const DEMO_DATA = {
         id: 'route',
         icon: faRoute
     }],
-    dropdownItems: [{
-        name: 'Edit User',
-        id: 'edit-user',
-    }, {
-        name: 'Delete User',
-        id: 'delete-user',
-    }, {
-        name: 'Reset Password',
-        id: 'reset-password',
-    }, {
-        name: 'Change Role',
-        id: 'change-role',
-    }],
-    menuItems: [{
-        name: 'Dashboard',
-        id: 'dashboard',
-    }, {
-        name: 'Content',
-        id: 'content',
-    }, {
-        name: 'Analytics',
-        id: 'analytics',
-    }, {
-        name: 'Admin',
-        id: 'admin',
-    }, {
-        name: 'Settings',
-        id: 'settings',
-    }],
+    components: {
+        adminPanel: {
+            identifier: 'admin-panel',
+        },
+        contentPanel: {
+            identifier: 'content-panel',
+        }
+    },
+    dropdown: {
+        identifier: 'dropdown-items',
+        items: [{
+            name: 'Edit User',
+            id: 'edit-user',
+        }, {
+            name: 'Delete User',
+            id: 'delete-user',
+        }, {
+            name: 'Reset Password',
+            id: 'reset-password',
+        }, {
+            name: 'Change Role',
+            id: 'change-role',
+        }]
+    },
+    menu: {
+        identifier: 'menu-items',
+        items: [{
+            name: 'Dashboard',
+            id: 'dashboard',
+        }, {
+            name: 'Content',
+            id: 'content',
+        }, {
+            name: 'Analytics',
+            id: 'analytics',
+        }, {
+            name: 'Admin',
+            id: 'admin',
+        }, {
+            name: 'Settings',
+            id: 'settings',
+        }]
+    },
     routes: [{
         name: 'Admin Panel',
         path: '/admin',

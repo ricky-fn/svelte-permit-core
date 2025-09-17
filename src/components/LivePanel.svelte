@@ -5,7 +5,7 @@
     const { children } = $props();
 </script>
 
-<div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+<div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm col-span-2 lg:col-span-1">
     <h2 class="text-2xl font-bold text-primary flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
         <Fa icon={faFlask} />
         Live Demo

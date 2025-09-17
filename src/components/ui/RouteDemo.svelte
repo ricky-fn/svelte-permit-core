@@ -7,6 +7,10 @@
     import { type AccessControl, type Role, type Group, RouteAccessPermission, createRouteAccessAction, RouteAccessAction } from "permit-core";
     import classNames from "classnames";
 	import RouteAccessControl from "$lib/RouteAccessControl.svelte";
+    import LivePanel from "$components/LivePanel.svelte";
+    import PermissionBreakdown from "./PermissionBreakdown.svelte";
+    import DemoCodeBlock from "./DemoCodeBlock.svelte";
+    import type { BundledLanguage } from 'shiki/bundle/web';
 
     let currentRoute = $state<typeof DEMO_DATA.routes[number]['path']>("/admin");
     const currentRole = getContext<Writable<Role>>("CurrentAccessRole");
@@ -85,6 +89,91 @@
         };
     });
 
+    let availableRoutes = $derived.by(() => {
+        return [DEMO_DATA.routes[0].path, DEMO_DATA.routes[1].path];
+    });
+
+	const configs: { title: string; lang: BundledLanguage; code: string }[] = [
+		{
+			title: 'Create Roles and Groups',
+			lang: 'typescript',
+			code: `import { createRole, createGroup } from 'permit-core';
+
+const adminRole = createRole('admin');
+const editorRole = createRole('editor');
+const viewerRole = createRole('viewer');
+
+const roles = [adminRole, editorRole, viewerRole];
+
+const adminGroup = createGroup('admin');
+const contentGroup = createGroup('content', adminGroup);
+
+const groups = [adminGroup, contentGroup];`
+		},
+		{
+			title: 'Define Route Permissions (Roles & Groups)',
+			lang: 'typescript',
+			code: `import { createRoutePermission } from 'permit-core';
+
+const groupPermissions = {
+  [adminGroup.getCode()]: {
+    navigation: createRoutePermission(adminGroup, [{
+      route: /.*/,
+    }])
+  },
+  [contentGroup.getCode()]: {
+    navigation: createRoutePermission(contentGroup, [{
+      route: '/admin',
+      exclude: true
+    }])
+  }
+};
+
+const rolePermissions = {
+  [adminRole.getCode()]: {
+    navigation: createRoutePermission(adminRole, [{
+      route: /.*/,
+    }])
+  },
+  [editorRole.getCode()]: {
+    navigation: createRoutePermission(editorRole, [{
+      route: '/content',
+    }])
+  },
+  [viewerRole.getCode()]: {
+    navigation: createRoutePermission(viewerRole, [])
+  }
+};`
+		},
+		{
+			title: 'Using RouteAccessControl in Svelte',
+			lang: 'svelte',
+			code: `<script lang="ts">
+  import AccessControlProvider from '$lib/AccessControlProvider.svelte';
+  import RouteAccessControl from '$lib/RouteAccessControl.svelte';
+  import { user } from '$stores/user.store';
+<\/script>
+
+<AccessControlProvider {roles} {groups} account={user}>
+  <RouteAccessControl route="/admin">
+    {#snippet children()}
+      <p>Access granted to Admin Panel</p>
+    {/snippet}
+    {#snippet fallback()}
+      <p>Access denied</p>
+    {/snippet}
+  </RouteAccessControl>
+  <RouteAccessControl route="/content">
+    {#snippet children()}
+      <p>Access granted to Content Panel</p>
+    {/snippet}
+    {#snippet fallback()}
+      <p>Access denied</p>
+    {/snippet}
+  </RouteAccessControl>
+</AccessControlProvider>`
+		}
+	];
 </script>
 
 {#snippet fallback()}
@@ -96,96 +185,87 @@
     </div>
 {/snippet}
 
-<h3 class="text-xl font-semibold text-primary mb-4">
-    <Fa icon={faRoute} class="mr-2 inline-block"/>
-    Route Access Control
-</h3>
+<LivePanel>
+    <h3 class="text-xl font-semibold text-primary mb-4">
+        <Fa icon={faRoute} class="mr-2 inline-block"/>
+        Route Access Control
+    </h3>
 
-<div class="bg-blue-50 rounded-xl p-4 mb-4">
-    <div class="route-display bg-white rounded-lg p-4 mb-4">
-        <span class="text-gray-600">Current route:</span>
-        <span class="font-medium">{currentRoute}</span>
+    <div class="bg-blue-50 rounded-xl p-4 mb-4">
+        <div class="route-display bg-white rounded-lg p-4 mb-4">
+            <span class="text-gray-600">Current route:</span>
+            <span class="font-medium">{currentRoute}</span>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-3">
+            <button 
+                class="py-2 px-4 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition"
+                onclick={() => currentRoute = DEMO_DATA.routes[0].path}
+            >
+                Go to Admin Panel
+            </button>
+            <button 
+                class="py-2 px-4 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition"
+                onclick={() => currentRoute = DEMO_DATA.routes[1].path}
+            >
+                Go to Content Panel
+            </button>
+        </div>
     </div>
-    
-    <div class="grid grid-cols-2 gap-3">
-        <button 
-            class="py-2 px-4 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition"
-            onclick={() => currentRoute = DEMO_DATA.routes[0].path}
-        >
-            Go to Admin Panel
-        </button>
-        <button 
-            class="py-2 px-4 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition"
-            onclick={() => currentRoute = DEMO_DATA.routes[1].path}
-        >
-            Go to Content Panel
-        </button>
-    </div>
-</div>
 
-<div class="bg-green-50 rounded-xl p-4 mb-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-            <h4 class="font-semibold text-gray-800 mb-3">Route Permissions</h4>
-            <div class="bg-white rounded-lg p-4">
-                <div class="flex justify-between py-1 border-b border-gray-100">
-                    <span>{DEMO_DATA.routes[0].path}</span>
-                    <span class={classNames("font-medium", {
-                        "text-green-500": adminPanelEffectivePermission,
-                        "text-red-500": !adminPanelEffectivePermission,
-                    })}>{adminPanelEffectivePermission ? 'Allowed' : 'Denied'}</span>
-                </div>
-                <div class="flex justify-between py-1">
-                    <span>{DEMO_DATA.routes[1].path}</span>
-                    <span class={classNames("font-medium", {
-                        "text-green-500": contentPanelEffectivePermission,
-                        "text-red-500": !contentPanelEffectivePermission,
-                    })}>{contentPanelEffectivePermission ? 'Allowed' : 'Denied'}</span>
+    <div class="bg-green-50 rounded-xl p-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h4 class="font-semibold text-gray-800 mb-3">Route Permissions</h4>
+                <div class="bg-white rounded-lg p-4">
+                    <div class="flex justify-between py-1 border-b border-gray-100">
+                        <span>{DEMO_DATA.routes[0].path}</span>
+                        <span class={classNames("font-medium", {
+                            "text-green-500": adminPanelEffectivePermission,
+                            "text-red-500": !adminPanelEffectivePermission,
+                        })}>{adminPanelEffectivePermission ? 'Allowed' : 'Denied'}</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                        <span>{DEMO_DATA.routes[1].path}</span>
+                        <span class={classNames("font-medium", {
+                            "text-green-500": contentPanelEffectivePermission,
+                            "text-red-500": !contentPanelEffectivePermission,
+                        })}>{contentPanelEffectivePermission ? 'Allowed' : 'Denied'}</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div>
-            <h4 class="font-semibold text-gray-800 mb-3">Access Status</h4>
-            {#if currentRoute === DEMO_DATA.routes[0].path}
-            <RouteAccessControl route="/admin" {fallback}>
-                <div class="bg-white rounded-lg p-4">
-                    <div class="text-center py-4 rounded-lg bg-green-50">
-                        <Fa icon={faCheckCircle} class="inline-block text-2xl mb-2 text-green-500"/>
-                        <p>Access granted to Admin Panel</p>
+            <div>
+                <h4 class="font-semibold text-gray-800 mb-3">Access Status</h4>
+                {#if currentRoute === DEMO_DATA.routes[0].path}
+                <RouteAccessControl route="/admin" {fallback}>
+                    <div class="bg-white rounded-lg p-4">
+                        <div class="text-center py-4 rounded-lg bg-green-50">
+                            <Fa icon={faCheckCircle} class="inline-block text-2xl mb-2 text-green-500"/>
+                            <p>Access granted to Admin Panel</p>
+                        </div>
                     </div>
-                </div>
-            </RouteAccessControl>
-            {:else if currentRoute === DEMO_DATA.routes[1].path}
-            <RouteAccessControl route="/content" {fallback}>
-                <div class="bg-white rounded-lg p-4">
-                    <div class="text-center py-4 rounded-lg bg-green-50">
-                        <Fa icon={faCheckCircle} class="inline-block text-2xl mb-2 text-green-500"/>
-                        <p>Access granted to Content Panel</p>
+                </RouteAccessControl>
+                {:else if currentRoute === DEMO_DATA.routes[1].path}
+                <RouteAccessControl route="/content" {fallback}>
+                    <div class="bg-white rounded-lg p-4">
+                        <div class="text-center py-4 rounded-lg bg-green-50">
+                            <Fa icon={faCheckCircle} class="inline-block text-2xl mb-2 text-green-500"/>
+                            <p>Access granted to Content Panel</p>
+                        </div>
                     </div>
-                </div>
-            </RouteAccessControl>
-            {/if}
+                </RouteAccessControl>
+                {/if}
+            </div>
         </div>
     </div>
-</div>
 
-<div class="bg-purple-50 rounded-xl p-4">
-    <h4 class="font-semibold text-gray-800 mb-3">Permission Breakdown</h4>
-    <div class="bg-white rounded-xl p-4 text-sm">
-        <div class="flex justify-between py-1 border-b border-gray-100">
-            <span>Base Role Permissions:</span>
-            <span id="rolePermissions" class="font-medium">{rolePermissions.join(', ')}</span>
-        </div>
-        <div class="flex justify-between py-1 border-b border-gray-100">
-            <span>Group Inheritance:</span>
-            <span id="groupPermissions" class="font-medium">{groupPermissions.join(', ')}</span>
-        </div>
-        <div class="flex justify-between py-1 font-bold">
-            <span>Available Routes:</span>
-            <span id="effectivePermissions" class="text-primary">
-                {adminPanelEffectivePermission ? `${DEMO_DATA.routes[0].path}` : ''}
-                {contentPanelEffectivePermission ? `${DEMO_DATA.routes[1].path}` : ''}
-            </span>
-        </div>
-    </div>
-</div>
+    <PermissionBreakdown
+        rolePermissions={rolePermissions}
+        groupPermissions={groupPermissions}
+        effectivePermissions={adminPanelEffectivePermission ? [DEMO_DATA.routes[0].path] : []}
+        effectiveLabel="Available Routes"
+        effectiveDisplay={availableRoutes.join(', ')}
+    />
+</LivePanel>
+
+<DemoCodeBlock {configs} />

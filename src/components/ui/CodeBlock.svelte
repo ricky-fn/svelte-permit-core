@@ -4,7 +4,7 @@
 
 	const { code, lang = 'ts', theme = 'one-dark-pro' } = $props<{
 		code: string;
-		lang?: string;
+		lang?: BundledLanguage;
 		theme?: string;
 	}>();
 
@@ -13,7 +13,7 @@
 
 	let highlighterPromise: Promise<Highlighter> | null = null;
 
-	async function ensureHighlighter(lang: string, theme: string): Promise<Highlighter> {
+	async function ensureHighlighter(lang: BundledLanguage, theme: string): Promise<Highlighter> {
 		if (!highlighterPromise) {
 			highlighterPromise = (async () => {
 				const mod = await import('shiki/bundle/web');
