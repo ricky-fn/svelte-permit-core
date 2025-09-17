@@ -1,85 +1,70 @@
-@import "./variables.css";
-@import "./normalize.css";
-@import "./font.css";
-@import "./reset.css";
 @import "tailwindcss";
 
-/* colors defined in variables.css */
-:root {
-	/* font */
-	--sans: "Atlas Grotesk", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
-	--serif: "Tiempos Text", Iowan Old Style, Times New Roman, Times, serif;
-	--mono: Menlo, Consolas, Monaco, monospace;
-
-	/* z-index */
-	--z-bottom: -100;
-	--z-middle: 0;
-	--z-top: 100;
-	--z-overlay: 1000;
-
-	/* presets (used in reset.css) */
-	--border-radius: 2px;
-	--font-body: var(--serif);
-	--font-form: var(--sans);
-	--color-bg: var(--color-white);
-	--color-fg: var(--color-gray-900);
-	--color-primary: var(--color-black);
-	--color-link: var(--color-black);
-	--color-link-hover: var(--color-black);
-	--color-focus: var(--color-red);
-	--color-mark: var(--color-yellow);
-	--color-selection: var(--color-gray-300);
-	--color-border: var(--color-gray-300);
-	--color-button-bg: var(--color-gray-300);
-	--color-button-fg: var(--color-gray-900);
-	--color-button-hover: var(--color-gray-400);
-	--color-input-bg: var(--color-gray-50);
-	--color-input-fg: var(--color-gray-900);
-	--color-placeholder: var(--color-gray-500);
-
-	/* "1" second duration */
-	--1s: 1ms;
+@theme {
+	--color-primary: #4361ee;
+	--color-primary-dark: #3f37c9;
+	--color-secondary: #4cc9f0;
+	--color-danger: #f72585;
+	--color-success: #4ade80;
+	--color-warning: #f59e0b;
+	--color-dark: #1e293b;
+	--color-light: #f8fafc;
 }
 
-/* dark theme */
-/* @media screen and (prefers-color-scheme:dark) {
-	:root {
-		
-	}
-} */
-
-@media screen and (prefers-reduced-motion: no-preference) {
-	:root {
-		--1s: 1s;
-	}
+.gradient-text {
+	background: linear-gradient(to right, #4361ee, #3f37c9);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
 }
-
-h1 {
-	font-size: var(--48px, 48px);
+.permission-card {
+	transition: all 0.3s ease;
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
-
-h2 {
-	font-size: var(--36px, 36px);
+.permission-card:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
-
-h3 {
-	font-size: var(--28px, 28px);
+.component-box {
+	box-shadow: 0 4px 6px rgba(67, 97, 238, 0.1);
 }
-
-h4 {
-	font-size: var(--24px, 24px);
+.dropdown-menu {
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
-
-h5 {
-	font-size: var(--22px, 22px);
+.route-display {
+	box-shadow: inset 0 0 0 1px #e2e8f0;
 }
-
-h6 {
-	font-size: var(--20px, 20px);
+.group-badge {
+	padding: 3px 8px;
+	border-radius: 12px;
+	font-size: 0.75rem;
+	font-weight: 600;
 }
-
-svg {
+.permission-indicator {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	display: inline-block;
+	margin-right: 6px;
+}
+.feature-tab {
+	transition: all 0.3s ease;
+	cursor: pointer;
+}
+.feature-tab.active {
+	background: linear-gradient(to right, #4361ee, #3f37c9);
+	color: white;
+}
+.demo-section {
+	display: none;
+}
+.demo-section.active {
 	display: block;
-	width: 100%;
-	height: auto;
+}
+.access-denied {
+	opacity: 0.6;
+	filter: grayscale(80%);
+	pointer-events: none;
+}
+.shiki {
+	padding: 1rem;
 }

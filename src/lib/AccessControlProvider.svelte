@@ -1,29 +1,33 @@
 <script lang="ts">
-    import { setContext, type Snippet } from "svelte";
-    import type { Writable } from "svelte/store";
-    import { createAccessControl, type Role, type RolePermissions } from "permit-core";
+    import { setContext, type Snippet, onDestroy } from "svelte";
+    import { writable, type Readable } from "svelte/store";
+    import { createAccessControl, type Group, type Role, type RolePermissions } from "permit-core";
 
     type Roles = Role[];
     type RoleCodes = Array<Roles[number]['code']>;
+    type Groups = Group[];
+    type GroupCodes = Array<Groups[number]['code']>;
 
-    const { children, roles, permissions, account}: { 
+    const { children, roles, groups, account }: { 
         children: Snippet, 
         roles: Roles, 
-        permissions: Record<string, RolePermissions>,
-        account: Writable<Record<string, any> & {role: string} | undefined> 
+        groups: Groups,
+        account: Readable<(Record<string, any> & { role: string; groupFlag?: string }) | null>
     } = $props();
 
-    // TODO: should use a store instead of a state
     const accessControl = createAccessControl({ roles });
-    let currentRole = $state<Role | null>(null);
+    const currentRole = writable<Role | null>(null);
+    const currentRoleGroup = writable<Group | null>(null);
+    let currentGroupCode = $state<GroupCodes[number] | null>(null);
     let currentRoleCode = $state<RoleCodes[number] | null>(null);
-    let currentAccessPermission = $state<RolePermissions | null>(null);
 
-    account.subscribe((state) => {
+    groups.forEach(group => accessControl.addGroup(group));
+    roles.forEach(role => accessControl.addRole(role));
+
+    const unsubscribe = account.subscribe((state) => {
         if (state && state.role !== currentRoleCode) {
             currentRoleCode = state.role;
-            currentAccessPermission = permissions[currentRoleCode];
-            currentRole = accessControl.getRoleByCode(currentRoleCode);
+            $currentRole = accessControl.getRoleByCode(currentRoleCode);
 
             if (!currentRole) {
                 throw new Error('role is not registered in the access control module');
@@ -31,22 +35,32 @@
         }
 
         if (!state) {
-            currentRole = null;
+            $currentRole = null;
+            $currentRoleGroup = null;
             currentRoleCode = null;
-            currentAccessPermission = null;
+            currentGroupCode = null;
         }
 
         if (state?.groupFlag && currentRole) {
             const group = accessControl.getGroupByCode(state.groupFlag);
             if (group) {
-                currentRole.assignGroup(group);
+                $currentRole.resetGroup();
+                $currentRole.assignGroup(group);
+                $currentRoleGroup = group;
+                currentGroupCode = group.getCode();
+            } else {
+                $currentRole.resetGroup();
+                $currentRoleGroup = null;
+                currentGroupCode = null;
             }
         }
     });
 
+    onDestroy(unsubscribe);
+
     setContext('AccessControl', accessControl);
-    setContext('AccessPermissions', permissions);
     setContext('CurrentAccessRole', currentRole);
+    setContext('CurrentAccessRoleGroup', currentRoleGroup);
 </script>
 
 {@render children()}

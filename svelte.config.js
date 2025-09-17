@@ -9,9 +9,6 @@ const preprocess = sveltePreprocess({
 });
 
 const config = {
-	compilerOptions: {
-		runes: true
-	},
 	preprocess,
 	kit: {
 		adapter: adapterStatic({ strict: false })

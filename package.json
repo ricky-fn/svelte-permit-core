@@ -56,8 +56,14 @@
 	},
 	"browserslist": "> 0.5%, last 4 versions, not ie <= 11, not ie_mob <= 11",
 	"dependencies": {
+		"@fortawesome/free-brands-svg-icons": "7.0.0",
+		"@fortawesome/free-solid-svg-icons": "7.0.0",
+		"@tailwindcss/postcss": "4.1.13",
 		"@tailwindcss/vite": "4.1.11",
-		"permit-core": "1.1.2",
+		"classnames": "2.5.1",
+		"permit-core": "1.2.1",
+		"shiki": "3.9.2",
+		"svelte-fa": "4.0.4",
 		"tailwindcss": "4.1.11"
 	}
 }
