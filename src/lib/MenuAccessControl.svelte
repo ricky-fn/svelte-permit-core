@@ -1,25 +1,59 @@
-<script lang="ts" module>
-	export type MenuAccessRules<T = string[]> = Partial<Record<string, T>>;
-</script>
-
 <script lang="ts">
-	import { MenuAccessAction, type RolePermissionGroup, type AccessControl, type Role, type Group, MenuAccessPermission } from 'permit-core';
+	/**
+	 * MenuAccessControl
+	 *
+	 * Computes the list of accessible menu items for the active role (and optional group)
+	 * using the access control context, and renders the `children` snippet for each item
+	 * in `menuList`, indicating whether the item is editable/visible for that role.
+	 *
+	 * Consumed contexts:
+	 * - `AccessControl`: Access control instance
+	 * - `CurrentAccessRole`: Writable<Role | null>
+	 * - `CurrentAccessRoleGroup`: Writable<Group | null>
+	 *
+	 * Usage:
+	 * ```svelte
+	 * <ul>
+	 * 		<MenuAccessControl identifier="menu-items" menuList={menuItems}>
+	 *   		{#snippet children({ menu, isEditable })}
+	 *     			<li class={classNames({
+	 *       			'hidden': !isEditable
+	 *     			})}>{menu}</li>
+	 *   		{/snippet}
+	 * 		</MenuAccessControl>
+	 * </ul>
+	 * ```
+	 */
+	import { MenuAccessAction, type AccessControl, type Role, type Group, MenuAccessPermission } from 'permit-core';
 	import type { Writable } from 'svelte/store';   
 	import { getContext, type Snippet } from 'svelte';
 
 	type T = $$Generic;
 
-    const { menuList, identifier, children }: { menuList: Array<T>, identifier: string, children: Snippet<[{ isEditable: boolean; role: Writable<Role>; menu: T; index: number }]> } = $props();
+	/**
+	 * Component props
+	 *
+	 * @prop {Array<T>} menuList - Full list of candidate menu items to evaluate.
+	 * @prop {string} identifier - Menu permission identifier to check against.
+	 * @prop {Snippet<[{ isEditable: boolean; role: Writable<Role>; menu: T; index: number }]>} children - Rendered for each item, with editability flag.
+	 */
+	const { menuList, identifier, children }: { menuList: Array<T>, identifier: string, children: Snippet<[{ isEditable: boolean; role: Writable<Role>; menu: T; index: number }]> } = $props();
 
+	/** Access control instance provided by AccessControlProvider */
 	const accessControl = getContext<AccessControl>('AccessControl');
+	/** Active role store */
 	const currentRole = getContext<Writable<Role>>("CurrentAccessRole");
+	/** Active group store (if assigned) */
 	const currentRoleGroup = getContext<Writable<Group>>("CurrentAccessRoleGroup");
 
+	/** Computed accessible menu list for the current role */
 	let accessibleMenu = $state<Array<T>>([]);
+	/** Cached values to detect when to recompute */
 	let currentRoleCode = $state<string>();
 	let currentRoleGroupCode = $state<string | undefined>();
 	let currentRolePermissions = $state([]);
 
+	/** Recompute accessible menu when role/group/permissions change */
 	$effect(() => {
 		if (
 			$currentRole && 
