@@ -1,6 +1,6 @@
-import adapterStatic from "@sveltejs/adapter-static";
 import { sveltePreprocess } from "svelte-preprocess";
 import autoprefixer from "autoprefixer";
+import adapter from '@sveltejs/adapter-cloudflare';
 
 const preprocess = sveltePreprocess({
 	postcss: {
@@ -11,7 +11,7 @@ const preprocess = sveltePreprocess({
 const config = {
 	preprocess,
 	kit: {
-		adapter: adapterStatic({ strict: false })
+		adapter: adapter({ strict: false })
 	}
 };
 
