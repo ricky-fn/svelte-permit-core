@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"verbatimModuleSyntax": true,
+		"moduleResolution": "bundler",
+		"module": "ESNext",
+		"target": "ESNext",
+		"paths": {
+			"$stores/*": ["./src/stores/*"],
+			"$lib/*": ["./src/lib/*"],
+			"$components/*": ["./src/components/*"],
+			"$data/*": ["./src/data/*"],
+			"$routes/*": ["./src/routes/*"],
+			"$runes/*": ["./src/runes/*"],
+			"$styles/*": ["./src/styles/*"],
+			"$svg/*": ["./src/svg/*"],
+			"$utils/*": ["./src/utils/*"]
+		}
+	},
+	"include": ["src/**/*"],
+	"extends": ["./.svelte-kit/tsconfig.json"]
+}
