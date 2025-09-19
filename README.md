@@ -1,236 +1,331 @@
-# Svelte Starter
+## 🛡️ Svelte Permit Core
 
-**NOTE**: This uses Svelte 5 and is under active migration (not all features will work). For the less adventurous, use the [previous version](https://github.com/the-pudding/svelte-starter) (with Svelte 4).
+> Svelte component wrappers for enterprise-grade access control  
+> Role-based permissions, group inheritance, and extensible validation powered by `permit-core`
 
-This [starter template](https://github.com/the-pudding/svelte-starter) aims to quickly scaffold a [SvelteKit](https://kit.svelte.dev/) project, designed around data-driven, visual stories at [The Pudding](https://pudding.cool).
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+![Svelte](https://img.shields.io/badge/Svelte-5.0+-ff3e00)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)
 
-### Notes
-* _Do not use or reproduce The Pudding logos or fonts without written permission._
-* _Prettier Formatting: Disable any text editor Prettier extensions to take advantage of the built-in rules._
+A robust Svelte integration for `permit-core` that provides:
 
-### Features
+- **Svelte-native components** for guarding routes, components, menus, and dropdowns
+- **Hierarchical permissions** with role/group inheritance
+- **Type-safe API** with full TypeScript support
+- **Reactive contexts** via Svelte stores
 
-- [ArchieML](http://archieml.org/) for micro-CMS powered by Google Docs and Sheets
-- [Lucide Icons](https://lucide.dev/) for simple/easy svg icons
-- [Style Dictionary](https://amzn.github.io/style-dictionary/) for CSS/JS style parity
-- [Runed](https://runed.dev/docs) for svelte5 rune utilities
-- CSV, JSON, and SVG imports
-- SSR static-hosted builds by default
+### Features ✨
 
-## Quickstart
-#### From Scratch
-* Click the green `Use this template` button above.
-* Alternatively: `npx degit the-pudding/svelte-starter my-project`
+- **Role & Group Management**
+  - Define roles and groups (with inheritance) using `permit-core`
+  - Provide active account via a Svelte store
 
-#### Pre-existing Project
-* clone the repo
+- **Permission Types**
+  - 🚦 Route access control
+  - 🧩 Component-level permission granularity (view/edit)
+  - 📋 Menu visibility management
+  - 🔽 Dropdown options visibility
 
-#### Installation
-* In your local repo run `pnpm install` or `npm install`
+- **Developer Experience**
+  - Works with Svelte 5 snippets and runes
+  - Clear contexts for access control
+  - TypeScript-friendly
 
-## Development
+## Installation 💻
 
 ```bash
-npm run dev
+npm install svelte-permit-core
 ```
 
-Change the script in `package.json` to `"dev": "svelte-kit dev --host"` to test on your local network on a different device.
+Requirements:
+- Node >= 18.20.4
+- Svelte 5
 
-## Deploy
-Check out the `Makefile` for specific tasks.
+## Quick Start 🚀
 
-### Staging (on Github)
-```bash
-npm run staging
+### 1) Import modules
+
+```svelte
+<script lang="ts">
+	import AccessControlProvider from 'svelte-permit-core';
+	import { ComponentAccessControl, DropdownAccessControl, MenuAccessControl, RouteAccessControl } from 'svelte-permit-core';
+
+	import { createRole, createGroup, createRoutePermission, createComponentPermission, createMenuPermission, createDropdownPermission } from 'permit-core';
+	import { readable } from 'svelte/store';
+</script>
 ```
 
-### Production (on AWS for pudding.cool)
-```bash
-npm run prodution
+### 2) Create roles and groups
+
+```ts
+const admin = createRole('admin');
+const editor = createRole('editor');
+const viewer = createRole('viewer');
+
+const adminGroup = createGroup('admin-group');
+const contentGroup = createGroup('content-group', adminGroup); // inherits from adminGroup
+
+const roles = [admin, editor, viewer];
+const groups = [adminGroup, contentGroup];
 ```
 
-### Manual
-```bash
-npm run build
+### 3) Define permissions
+
+```ts
+// Group-level permissions (inheritance)
+const groupPermissions = {
+  [adminGroup.getCode()]: {
+    navigation: createRoutePermission(adminGroup, [{ route: /.*/ }]),
+    component:  createComponentPermission(adminGroup, [{ identifier: /.*/, actions: ['view', 'edit'] }]),
+    dropdown:   createDropdownPermission(adminGroup, [{ identifier: /.*/, list: /.*/ }]),
+    menu:       createMenuPermission(adminGroup, [{ identifier: 'main-menu', list: /.*/ }]),
+  },
+  [contentGroup.getCode()]: {
+    navigation: createRoutePermission(contentGroup, [{ route: '/admin', exclude: true }]),
+    component:  createComponentPermission(contentGroup, [
+      { identifier: 'admin-panel', actions: ['edit'], exclude: true },
+      { identifier: 'content-panel', actions: ['view', 'edit'] }
+    ]),
+    dropdown:   createDropdownPermission(contentGroup, [
+      { identifier: 'actions-dropdown', list: ['delete-user', 'change-role', 'reset-password'], exclude: true }
+    ]),
+    menu:       createMenuPermission(contentGroup, [
+      { identifier: 'main-menu', list: ['analytics', 'admin'], exclude: true }
+    ]),
+  }
+};
+
+// Role-level permissions
+const rolePermissions = {
+  [admin.getCode()]: {
+    navigation: createRoutePermission(admin, [{ route: /.*/ }]),
+    component:  createComponentPermission(admin, [{ identifier: /.*/, actions: ['view', 'edit'] }]),
+    dropdown:   createDropdownPermission(admin, [{ identifier: /.*/, list: /.*/ }]),
+    menu:       createMenuPermission(admin, [{ identifier: 'main-menu', list: /.*/ }]),
+  },
+  [editor.getCode()]: {
+    navigation: createRoutePermission(editor, [{ route: '/content' }]),
+    component:  createComponentPermission(editor, [
+      { identifier: 'admin-panel', actions: ['view'] },
+      { identifier: 'content-panel', actions: ['view', 'edit'] }
+    ]),
+    dropdown:   createDropdownPermission(editor, [
+      { identifier: 'actions-dropdown', list: ['edit-user', 'reset-password'] }
+    ]),
+    menu:       createMenuPermission(editor, [
+      { identifier: 'main-menu', list: ['dashboard', 'content', 'settings'] }
+    ]),
+  },
+  [viewer.getCode()]: {
+    navigation: createRoutePermission(viewer, []),
+    component:  createComponentPermission(viewer, [{ identifier: 'content-panel', actions: ['view'] }]),
+    menu:       createMenuPermission(viewer, [{ identifier: 'main-menu', list: ['dashboard'] }]),
+  }
+};
 ```
-This generates a directory called `build` with the statically rendered app.
 
-### Password-Protected
-To create a password-protected build:
+### 4) Provide the active account
 
-Make sure you have a `.env` file in your root with a value of `PASSWORD=yourpassword` 
-```bash
-make protect
+```ts
+type Account = { role: string; groupFlag?: string } | null;
+
+// Example: replace with your auth/user store
+const account = readable<Account>({ role: 'admin', groupFlag: 'content-group' });
 ```
 
-Then run either `make github` or `make pudding`.
+### 5) Wrap your app with the provider
 
-## Style
+```svelte
+<AccessControlProvider {roles} {groups} account={account}>
+	<!-- your app -->
+</AccessControlProvider>
+```
 
-There are a few stylesheets included by default in `src/styles`. Refer to them in `app.css`, the place for applying global styles.
+### 6) Guard UI with access control components
 
-For variable parity in both CSS and JS, modify files in the `properties` folder using the [Style Dictionary](https://amzn.github.io/style-dictionary/) API.
+- Route guard:
 
-Run `npm run style` to regenerate the style dictionary.
+```svelte
+<RouteAccessControl route="/admin">
+  {#snippet children({ role, route })}
+    <p>Access granted to {route}</p>
+  {/snippet}
+  {#snippet fallback({ role, route })}
+    <p>Access denied to {route}</p>
+  {/snippet}
+</RouteAccessControl>
+```
 
-#### Some css utility classes in reset.css
-* `.sr-only`: makes content invisible available for screen reader
-* `.text-outline`: adds a psuedo stroke to text element
+- Component guard:
 
-### Custom Fonts
-For locally hosted fonts, simply add the font to the `static/assets` folder and include a reference in `src/styles/font.css`, making sure the url starts with `"assets/..."`.
+```svelte
+<ComponentAccessControl identifier="content-panel">
+  {#snippet children({ isEditable, role })}
+    <button disabled={!isEditable}>Edit content</button>
+  {/snippet}
+  {#snippet fallback({ role })}
+    <p>You do not have access to this component.</p>
+  {/snippet}
+</ComponentAccessControl>
+```
 
-## Google Docs and Sheets
+- Menu guard:
 
-* Create a Google Doc or Sheet
-* Click `Share` -> `Advanced` -> `Change...` -> `Anyone with this link`
-* In the address bar, grab the ID - eg. "...com/document/d/**1IiA5a5iCjbjOYvZVgPcjGzMy5PyfCzpPF-LnQdCdFI0**/edit"
-* paste in the ID above into `google.config.js`, and set the filepath to where you want the file saved
-* If you want to do a Google Sheet, be sure to include the `gid` value in the url as well
+```svelte
+<script lang="ts">
+  const menuItems = ['dashboard', 'content', 'analytics', 'admin', 'settings'] as const;
+</script>
 
-Running `npm run gdoc` at any point (even in new tab while server is running) will fetch the latest from all Docs and Sheets.
+<ul>
+  <MenuAccessControl identifier="main-menu" menuList={menuItems}>
+    {#snippet children({ isEditable, menu })}
+      <li class:hidden={!isEditable}>{menu}</li>
+    {/snippet}
+  </MenuAccessControl>
+</ul>
+```
 
-## Structural Overview
+- Dropdown guard:
 
-### Pages
-The `src/routes` directory contains pages for your app. For a single-page app (most cases) you don't have to modify anything in here. `+page.svelte` represents the root page, think of it as the `index.html` file. It is prepopulated with a few things like metadata and font preloading. It also includes a reference to a blank slate component `src/components/Index.svelte`. This is the file you want to really start in for your app.
+```svelte
+<script lang="ts">
+  const actions = ['edit-user', 'delete-user', 'reset-password', 'change-role'] as const;
+</script>
 
-### Embedding Data
-For smaller datasets, it is often great to embed the data into the HTML file. If you want to use data as-is, you can use normal import syntax (e.g., `import data from "$data/file.csv"`). If you are working with data but you want to preserve the original or clean/parse just what you need to use in the browser to optimize the front-end payload, you can load it via `+page.server.js`, do some work on it, and return just what you need. This is passed automatically to `+page.svelte` and accessible in any component with `getContext("data")`.
+<ul>
+  <DropdownAccessControl identifier="actions-dropdown" list={actions}>
+    {#snippet children({ isEditable, item })}
+      <li>
+        <span class={isEditable ? 'text-green-600' : 'text-red-600'}>
+          {item}
+        </span>
+      </li>
+    {/snippet}
+  </DropdownAccessControl>
+</ul>
+```
 
+## Documentation 📚
 
-## Pre-loaded helpers
+### Core Concepts
+
+| Concept        | Description                                      |
+| -------------- | ------------------------------------------------ |
+| **Role**       | Defines user permissions and privileges          |
+| **Group**      | Organizes roles; supports hierarchical inheritance |
+| **Permission** | Rule set for a specific resource type            |
+| **Action**     | Operation to be validated (route, component, etc.) |
+| **Validator**  | Applies permission rules to the action           |
 
 ### Components
 
-Located in `src/components`.
+| Component                      | Purpose                                           |
+| ----------------------------- | ------------------------------------------------- |
+| `AccessControlProvider`       | Initializes access control and exposes contexts   |
+| `RouteAccessControl`          | Conditionally renders based on route access       |
+| `ComponentAccessControl`      | Guards a UI fragment (view/edit)                  |
+| `MenuAccessControl`           | Filters a menu list for the active role/group     |
+| `DropdownAccessControl`       | Filters a dropdown list for the active role/group |
 
-```js
-// Usage
-import Example from "$components/Example.svelte";
+### AccessControlProvider
+
+- Props:
+  - **roles**: `Role[]` — registered roles
+  - **groups**: `Group[]` — registered groups (with optional inheritance)
+  - **account**: `Readable<{ role: string; groupFlag?: string } | null>` — current account state
+  - **children**: `Snippet` — subtree to render with provided contexts
+
+- Contexts exposed to descendants:
+  - `AccessControl`: initialized access control instance
+  - `CurrentAccessRole`: `Writable<Role | null>`
+  - `CurrentAccessRoleGroup`: `Writable<Group | null>`
+
+### Route Permissions
+
+```svelte
+<RouteAccessControl route="/admin">
+  {#snippet children({ role, route })}
+    <p>Welcome to {route}</p>
+  {/snippet}
+  {#snippet fallback()}
+    <p>Not authorized</p>
+  {/snippet}
+</RouteAccessControl>
 ```
 
-* `Footer.svelte`: Pudding recirculation and social links.
-* `Header.svelte`: Pudding masthead.
+### Component Permissions
 
-### Helper Components
-
-Located in `src/components/helpers`.
-
-```js
-// Usage
-import Example from "$components/helpers/Example.svelte";
+```svelte
+<ComponentAccessControl identifier="admin-panel">
+  {#snippet children({ isEditable })}
+    <button disabled={!isEditable}>Edit</button>
+  {/snippet}
+</ComponentAccessControl>
 ```
 
-*Available*
-* `Scrolly.svelte`: Scrollytelling.
+### Menu Permissions
 
-*Need to migrate*
-* `ButtonSet.svelte`: Accessible button group inputs.
-* `Chunk.svelte`: Split text into smaller dom element chunks.
-* `Countdown.svelte`: Countdown timer text.
-* `DarkModeToggle.svelte`: A toggle button for dark mode.
-* `Figure.svelte`: A barebones chart figure component to handle slots.
-* `MotionToggle.svelte`: A toggle button to enable/disable front-end user motion preference.
-* `Range.svelte`: Customizable range slider.
-* `ShareLink.svelte`: Button to share link natively/copy to clipboard.
-* `SortTable.svelte`: Sortable semantic table with customizable props.
-* `Slider.svelte (and Slider.Slide.svelte)`: A slider widget, especially useful for swipe/slide stories.
-* `Tap.svelte`: Edge-of-screen tapping library, designed to integrate with slider.
-* `Tip.svelte`: Button that links to Strip payment link.
-* `Toggle.svelte`: Accessible toggle inputs.
-
-### Headless Components
-
-[bits UI](https://www.bits-ui.com/docs/introduction) comes pre-installed. It is recommended to use these for any UI components.
-
-### Layercake Chart Components
-
-Starter templates for various chart types to be used with [LayerCake](https://layercake.graphics/). Located in `src/components/layercake`.
-
-*Note:* You must install the module `layercake` first.
-
-```js
-// Usage
-import Example from "$components/layercake/Example.svelte";
+```svelte
+<MenuAccessControl identifier="main-menu" menuList={['dashboard', 'settings']}>
+  {#snippet children({ isEditable, menu })}
+    <li class:hidden={!isEditable}>{menu}</li>
+  {/snippet}
+</MenuAccessControl>
 ```
 
-### Actions
+### Dropdown Permissions
 
-Located in `src/actions`.
-
-```js
-// Usage
-import example from "$actions/action.js";
+```svelte
+<DropdownAccessControl identifier="actions-dropdown" list={['edit-user', 'delete-user']}>
+  {#snippet children({ isEditable, item })}
+    <button disabled={!isEditable}>{item}</button>
+  {/snippet}
+</DropdownAccessControl>
 ```
 
-* `canTab.js`: enable/disable tabbing on child elements.
-* `checkOverlap.js`: Label overlapping detection. Loops through selection of nodes and adds a class to the ones that are overlapping. Once one is hidden it ignores it.
-* `focusTrap.js`: Enable a keyboard focus trap for modals and menus.
-* `keepWithinBox.js`: Offsets and element left/right to stay within parent.
-* `inView.js`: detect when an element enters or exits the viewport.
-* `resize.js`: detect when an element is resized.
+### How Roles and Groups Work
 
-### Runes
+- **Roles** hold permissions for route, component, menu, and dropdown checks.
+- **Groups** can be assigned to roles and may inherit from other groups, enabling hierarchical policies.
+- If a **group** includes a permission, roles assigned to that group inherit it without duplicating the rule at the role level.
 
-These are located in `src/runes`. You can put custom ones in `src/runes/misc.js` or create unique files for more complex ones.
+## Contributing 🤝
 
-```js
-import { example } from "$runes/misc/misc.js";
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feat/your-feature`
+3. Commit your changes: `git commit -m "feat(scope): add something"`
+4. Push to the branch: `git push origin feat/your-feature`
+5. Open a pull request
+
+### Commit Message Guidelines
+
+```text
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
 ```
 
-* `useWindowDimensions`: returns an object `{ width, height }` of the viewport dimensions. It is debounced for performance.
-* `useClipboard`: copy content to clipboard.
-* `useFetcher`: load async data from endpoints (local or external).
-* `useWindowFocus`: determine if the window is in focus or not.
+Example:
 
-For more preset runes, use [runed](https://runed.dev/docs) which is preloaded. 
+```text
+feat(permissions): add dropdown guard
 
-### Utils
+- Implement DropdownAccessControl
+- Add examples to README
+- Wire to AccessControlProvider
 
-Located in `src/utils/`.
-
-```js
-// Usage
-import example from "$utils/example.js";
-```
-* `checkScrollDir.js`: Gets the user's scroll direction ("up" or "down")
-* `csvDownload.js`: Converts a flat array of data to CSV content ready to be used as an `href` value for download.
-* `generateId.js`: Generate an alphanumeric id.
-* `loadCsv.js`: Loads and parses a CSV file.
-* `loadImage.js`: Loads an image.
-* `loadJson.js`: Loads and parses a JSON file.
-* `loadPixels.js`: Loads the pixel data of an image via an offscreen canvas.
-* `localStorage.js`: Read and write to local storage.
-* `mapToArray.js`: Convenience function to convert a map to an array.
-* `move.js`: transform translate function shorthand.
-* `transformSvg.js`: Custom transition lets you apply an svg transform property with the in/out svelte transition. Parameters (with defaults):
-* `translate.js`: Convenience function for transform translate css.
-* `urlParams.js`: Get and set url parameters.
-
-## Tips
-
-### Image asset paths
-For `img` tags, use relative paths:
-
-```html
-<img src="assets/demo/test.jpg" />
+Resolves: #123
 ```
 
-or use `base` if on a sub route:
+## License 📄
 
-```html
-<script>
-	import { base } from "$app/paths";
-</script>
+This project is licensed under the MIT License - see the `LICENSE` file for details.
 
-<img src="{base}/assets/demo/test.jpg"  />
-```
+## Changelog 📜
 
-For CSS background images, use absolute paths:
-
-```css
-background: url("/assets/demo/test.jpg");
-```
-
-View example code in the preloaded demo.
+### v0.0.1
+- Initial Svelte integration for `permit-core`
+- `AccessControlProvider`, `RouteAccessControl`, `ComponentAccessControl`, `MenuAccessControl`, `DropdownAccessControl`
+- Svelte 5 snippets and TypeScript support
