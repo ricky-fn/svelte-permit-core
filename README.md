@@ -325,7 +325,7 @@ This project is licensed under the MIT License - see the `LICENSE` file for deta
 
 ## Changelog 📜
 
-### v0.0.1
+### v1.0.0
 - Initial Svelte integration for `permit-core`
 - `AccessControlProvider`, `RouteAccessControl`, `ComponentAccessControl`, `MenuAccessControl`, `DropdownAccessControl`
 - Svelte 5 snippets and TypeScript support
