@@ -14,6 +14,14 @@ A robust Svelte integration for `permit-core` that provides:
 - **Type-safe API** with full TypeScript support
 - **Reactive contexts** via Svelte stores
 
+## Live Demo
+
+Try the full feature demo: [svelte-permit-core.pages.dev](https://svelte-permit-core.pages.dev)
+
+## Core Engine
+
+This library wraps the core authorization engine: [permit-core](https://github.com/ricky-fn/permit-core)
+
 ### Features ✨
 
 - **Role & Group Management**
@@ -179,7 +187,7 @@ const account = readable<Account>({ role: 'admin', groupFlag: 'content-group' })
 <ul>
   <MenuAccessControl identifier="main-menu" menuList={menuItems}>
     {#snippet children({ isEditable, menu })}
-      <li class:hidden={!isEditable}>{menu}</li>
+      <li class={!isEditable ? 'hidden' : ''}>{menu}</li>
     {/snippet}
   </MenuAccessControl>
 </ul>
