@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DEMO_DATA } from "$lib/data/demo";
+	import { DEMO_DATA } from "$constants/demo";
 	import MenuAccessControl from "$lib/MenuAccessControl.svelte";
     import { faBars } from "@fortawesome/free-solid-svg-icons";
 	import classNames from "classnames";

@@ -7,9 +7,8 @@
 	import Footer from "$components/Footer.svelte";
 	import { createComponentPermission, createDropdownPermission, createGroup, createMenuPermission, createRole, createRoutePermission } from "permit-core";
 	import { writable } from "svelte/store";
-	import { DEMO_DATA } from "$lib/data/demo";
+	import { DEMO_DATA } from "$constants/demo";
 	import { onMount } from "svelte";
-	import LivePanel from "$components/LivePanel.svelte";
 	import ComponentDemo from "$components/ui/ComponentDemo.svelte";
 	import DropdownDemo from "$components/ui/DropdownDemo.svelte";
 	import MenuDemo from "$components/ui/MenuDemo.svelte";

@@ -1,9 +1,8 @@
 <script lang="ts">
-	import CodeBlock from "$components/ui/CodeBlock.svelte";
 	import Fa from "svelte-fa";
 	import { faArrowDown, faCogs } from "@fortawesome/free-solid-svg-icons";
 	import { user } from "$stores/user.store";
-	import { DEMO_DATA } from "$lib/data/demo";
+	import { DEMO_DATA } from "$constants/demo";
 	import { getContext } from "svelte";
 	import type { Role } from "permit-core";
 	import type { Writable } from "svelte/store";

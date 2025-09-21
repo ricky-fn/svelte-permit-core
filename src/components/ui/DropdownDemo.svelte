@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DEMO_DATA } from "$lib/data/demo";
+	import { DEMO_DATA } from "$constants/demo";
 	import DropdownAccessControl from "$lib/DropdownAccessControl.svelte";
     import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 	import classNames from "classnames";

@@ -7,7 +7,7 @@
     import type { BundledLanguage } from 'shiki/bundle/web';
 	import type { Writable } from "svelte/store";
 	import { createComponentAccessAction, type AccessControl, type ComponentAccessAction, type ComponentAccessPermission, type Group, type Role } from "permit-core";
-    import { DEMO_DATA } from "$lib/data/demo";
+    import { DEMO_DATA } from "$constants/demo";
 	import LivePanel from "$components/LivePanel.svelte";
 	import PermissionBreakdown from "./PermissionBreakdown.svelte";
 	import DemoCodeBlock from "./DemoCodeBlock.svelte";
