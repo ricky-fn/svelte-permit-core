@@ -1,6 +1,6 @@
 {
 	"name": "svelte-permit-core",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Core RBAC implementation for Permit with Svelte",
 	"homepage": "https://github.com/ricky-fn/svelte-permit-core#readme",
 	"bugs": {
