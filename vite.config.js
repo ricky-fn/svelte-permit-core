@@ -20,7 +20,7 @@ export default defineConfig({
 		alias: {
 			$actions: path.resolve("./src/actions"),
 			$components: path.resolve("./src/components"),
-			$data: path.resolve("./src/data"),
+			$constants: path.resolve("./src/constants"),
 			$lib: path.resolve("./src/lib"),
 			$stores: path.resolve("./src/stores"),
 			$routes: path.resolve("./src/routes"),

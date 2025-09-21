@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import { createHighlighter } from 'shiki/bundle/web';
 	import type { Highlighter, BundledTheme, BundledLanguage } from 'shiki/bundle/web';
 
 	const { code, lang = 'ts', theme = 'one-dark-pro' } = $props<{
@@ -10,15 +11,13 @@
 
 	let html = $state('');
 	let mounted = $state(false);
+	let instance: Highlighter | null = null;
 
 	let highlighterPromise: Promise<Highlighter> | null = null;
 
-	async function ensureHighlighter(lang: BundledLanguage, theme: string): Promise<Highlighter> {
+	const ensureHighlighter = async (lang: BundledLanguage, theme: string) => {
 		if (!highlighterPromise) {
-			highlighterPromise = (async () => {
-				const mod = await import('shiki/bundle/web');
-				return mod.createHighlighter({ themes: [theme], langs: [lang] });
-			})();
+			highlighterPromise = createHighlighter({ themes: [theme], langs: [lang] });
 		}
 		const h = await highlighterPromise;
 
@@ -28,6 +27,7 @@
 		if (!h.getLoadedLanguages().includes(lang)) {
 			await h.loadLanguage(lang as BundledLanguage);
 		}
+		
 		return h;
 	}
 
@@ -39,7 +39,14 @@
 		if (!mounted) return;
 		ensureHighlighter(lang, theme).then((h) => {
 			html = h.codeToHtml(code, { lang, theme });
+			instance = h;
 		});
+	});
+
+	onDestroy(() => {
+		if (instance) {
+			instance.dispose();
+		}
 	});
 </script>
 

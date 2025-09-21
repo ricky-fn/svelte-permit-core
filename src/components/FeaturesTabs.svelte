@@ -3,7 +3,7 @@
     import Fa from 'svelte-fa';
     import { type IconDefinition } from '@fortawesome/free-solid-svg-icons';
     import { type Writable } from "svelte/store";
-    import { DEMO_DATA } from "$lib/data/demo";
+    import { DEMO_DATA } from "$constants/demo";
 	import classNames from "classnames";
     
     const { currentTab }: { currentTab: Writable<string> } = $props();
