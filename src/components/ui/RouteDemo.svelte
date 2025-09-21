@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DEMO_DATA } from "$lib/data/demo";
+	import { DEMO_DATA } from "$constants/demo";
     import { faRoute, faLock, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
     import Fa from 'svelte-fa';
     import { getContext } from "svelte";
